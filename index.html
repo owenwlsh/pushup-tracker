@@ -7,68 +7,156 @@
   body {
     font-family: 'Arial', sans-serif;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f5f5f5;
+    background-color: #f0f4f8;
+  }
+  h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: #333;
   }
   .container {
     display: flex;
     align-items: center;
-    background-color: #fff;
-    padding: 40px;
+    justify-content: space-between;
+    background-color: #ffffff;
+    padding: 50px 60px;
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    width: 800px;
     position: relative;
+    transition: all 0.2s ease;
+  }
+  .box, .center-box {
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    cursor: default;
+  }
+  .box:hover, .center-box:hover {
+    transform: scale(1.05);
+    background-color: #e0e4eb;
   }
   .box {
     text-align: center;
-    width: 150px;
-    font-size: 24px;
-    font-weight: bold;
+    width: 180px;
+    font-size: 28px;
+    font-weight: 700;
     color: #333;
+    padding: 25px;
+    border-radius: 15px;
+    background-color: #f9f9f9;
+    border: 2px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
   }
-  .lines {
+  .center-box {
+    width: 220px;
+    height: 220px;
+    font-size: 32px;
+    font-weight: 800;
+    color: #222;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border: 3px solid #bbb;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+  }
+  .center-text {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    text-align: center;
+    z-index: 1;
+  }
+  .center-text .number {
+    font-size: 32px;
+    font-weight: 800;
+    color: #222;
+  }
+  .center-text .percentage {
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+    margin-top: 5px;
+  }
+  .progress-circle {
     width: 100%;
-    height: 0;
-    z-index: -1;
-  }
-  .lines::before, .lines::after {
-    content: '';
+    height: 100%;
+    border-radius: 50%;
     position: absolute;
-    border-top: 2px solid #999;
-  }
-  .lines::before {
+    top: 0;
     left: 0;
-    width: 50%;
-    top: 0;
+    background: conic-gradient(#bbb 0deg, #bbb 0deg, #f9f9f9 0deg 360deg);
+    z-index: 0;
   }
-  .lines::after {
-    right: 0;
-    width: 50%;
-    top: 0;
+  .line {
+    position: absolute;
+    height: 3px;
+    background: #aaa;
+    top: 50%;
+  }
+  .line-left { left: -50px; width: 50px; }
+  .line-right { right: -50px; width: 50px; }
+  .box-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+  }
+  footer {
+    margin-top: 40px;
+    display: flex;
+    gap: 30px;
+  }
+  footer a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+  footer a:hover {
+    color: #555;
   }
 </style>
 </head>
 <body>
+  <h1>Pushup Tracker</h1>
   <div class="container">
-    <div class="box" id="left">Loading...</div>
-    <div class="box" id="total">Total</div>
-    <div class="lines"></div>
+    <div class="box" id="done-box">
+      <div class="box-title">Completed</div>
+      <div id="done">0</div>
+    </div>
+    <div class="center-box" id="total">
+      <div class="progress-circle" id="progress"></div>
+      <div class="center-text">
+        <div class="number" id="total-number">Total</div>
+        <div class="percentage" id="percent-text">0%</div>
+      </div>
+    </div>
+    <div class="box" id="left-box">
+      <div class="box-title">Remaining</div>
+      <div id="remaining">0</div>
+    </div>
+    <div class="line line-left"></div>
+    <div class="line line-right"></div>
   </div>
+
+  <footer>
+    <a href="https://instagram.com/owenwlsh" target="_blank">Instagram</a>
+    <a href="https://tiktok.com/@owenwlsh" target="_blank">TikTok</a>
+    <a href="https://youtube.com/@owenwlsh" target="_blank">YouTube</a>
+    <a href="https://twitter.com/owenwlsh" target="_blank">Twitter</a>
+  </footer>
 
   <script>
     async function loadData() {
       try {
         const url = "https://owenwlsh.github.io/pushup-tracker/stats.json";
         const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
 
         const youtube = data.youtube;
@@ -78,13 +166,23 @@
 
         const total = youtube + instagram + tiktok;
         const remaining = total - completed;
+        const percent = Math.round((completed / total) * 100);
 
-        document.getElementById('left').textContent = `${completed.toLocaleString()} Done\n${remaining.toLocaleString()} Left`;
-        document.getElementById('total').textContent = `${total.toLocaleString()} Total`;
+        document.getElementById('done').textContent = completed.toLocaleString();
+        document.getElementById('remaining').textContent = remaining.toLocaleString();
+        document.getElementById('total-number').textContent = total.toLocaleString();
+        document.getElementById('percent-text').textContent = `${percent}%`;
+
+        // Update progress circle
+        document.getElementById('progress').style.background = 
+          `conic-gradient(#bbb 0deg ${percent*3.6}deg, #f9f9f9 ${percent*3.6}deg 360deg)`;
+
       } catch (e) {
         console.error('Error loading JSON:', e);
-        document.getElementById('left').textContent = 'Error loading data';
-        document.getElementById('total').textContent = '';
+        document.getElementById('done').textContent = '-';
+        document.getElementById('remaining').textContent = '-';
+        document.getElementById('total-number').textContent = 'Error';
+        document.getElementById('percent-text').textContent = '';
       }
     }
 
