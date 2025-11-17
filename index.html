@@ -64,10 +64,11 @@
   <script>
     async function loadData() {
       try {
-        // GitHub Pages URL for stats.json
         const url = "https://owenwlsh.github.io/pushup-tracker/stats.json";
-
         const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
         const data = await res.json();
 
         const youtube = data.youtube;
@@ -81,6 +82,7 @@
         document.getElementById('left').textContent = `${completed.toLocaleString()} Done\n${remaining.toLocaleString()} Left`;
         document.getElementById('total').textContent = `${total.toLocaleString()} Total`;
       } catch (e) {
+        console.error('Error loading JSON:', e);
         document.getElementById('left').textContent = 'Error loading data';
         document.getElementById('total').textContent = '';
       }
