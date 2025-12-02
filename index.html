@@ -9,6 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
+      --bg: #0c1210;
+      --panel: #101b17;
+      --panel-2: #0e1613;
+      --stroke: #16211d;
+      --accent: #4af0c8;
+      --accent-soft: rgba(74, 240, 200, 0.14);
+      --text: #e8fdf4;
+      --muted: #9fb8ad;
+      --glow: 0 18px 50px rgba(74, 240, 200, 0.12);
       --bg: #0b1021;
       --card: rgba(255, 255, 255, 0.04);
       --accent: #56c8ff;
@@ -23,6 +32,61 @@
     body {
       margin: 0;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .background {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    #particle-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0.45;
+      filter: drop-shadow(0 0 4px rgba(74, 240, 200, 0.25));
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, rgba(74, 240, 200, 0.08) 0, transparent 35%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 44px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0.04) 1px, transparent 1px, transparent 44px);
+      mix-blend-mode: screen;
+      opacity: 0.25;
+      transform: translate3d(0,0,0);
+      transition: transform 220ms ease;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 48px 20px 56px;
+      display: grid;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      margin: 0;
       background: radial-gradient(circle at 10% 10%, rgba(86, 200, 255, 0.1), transparent 30%),
                   radial-gradient(circle at 90% 20%, rgba(255, 143, 90, 0.08), transparent 35%),
                   radial-gradient(circle at 40% 80%, rgba(86, 200, 255, 0.07), transparent 35%),
@@ -88,6 +152,67 @@
       letter-spacing: -0.02em;
     }
 
+    .title-block p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 580px;
+      line-height: 1.5;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 14px;
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.01em;
+    }
+
+    .pill strong { color: var(--accent); }
+
+    .card {
+      background: linear-gradient(160deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--glow);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .stat {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--stroke);
+      display: grid;
+      gap: 6px;
+    }
+
+    .stat-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 32px;
     .hero p {
       margin: 0;
       color: var(--muted);
@@ -140,6 +265,7 @@
       letter-spacing: -0.01em;
     }
 
+    .stat-sub { color: var(--muted); font-size: 13px; }
     .stat-sub {
       color: var(--muted);
       font-size: 14px;
@@ -152,6 +278,153 @@
       aspect-ratio: 1;
       display: grid;
       place-items: center;
+    }
+
+    .progress-ring svg { width: 100%; height: 100%; }
+    .progress-bg circle { stroke: rgba(255, 255, 255, 0.08); }
+    .progress-fg { filter: drop-shadow(0 0 8px rgba(74, 240, 200, 0.55)); }
+
+    .progress-number {
+      position: absolute;
+      display: grid;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .progress-number .total { font-size: clamp(26px, 4vw, 32px); font-weight: 800; }
+    .progress-number .label { color: var(--muted); font-size: 13px; }
+    .progress-number .percent { color: var(--accent); font-weight: 700; letter-spacing: 0.04em; }
+
+    .supporters {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: rgba(74, 240, 200, 0.12);
+      color: #b9ffee;
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid rgba(74, 240, 200, 0.3);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow: 0 10px 24px rgba(74, 240, 200, 0.12);
+    }
+
+    .support-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--stroke);
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+
+    .support-card:hover { transform: translateY(-3px); border-color: rgba(74, 240, 200, 0.5); }
+    .support-name { margin: 0; font-size: 15px; letter-spacing: 0.02em; }
+    .support-count { font-weight: 800; font-size: 22px; color: var(--accent); }
+    .support-label { color: var(--muted); font-size: 13px; }
+
+    .notice {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #043427;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+      box-shadow: 0 10px 24px rgba(74, 240, 200, 0.2);
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(74, 240, 200, 0.32); }
+
+    footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; font-weight: 700; }
+    footer a:hover { color: #b8ffe9; }
+
+    /* Loader */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, #0f1613, #0c1210);
+      display: grid;
+      place-items: center;
+      z-index: 5;
+      transition: opacity 260ms ease, visibility 260ms ease;
+    }
+
+    .loader.hidden { opacity: 0; visibility: hidden; }
+
+    .loader-card {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 22px 26px;
+      display: grid;
+      gap: 14px;
+      text-align: center;
+      min-width: 260px;
+      box-shadow: var(--glow);
+    }
+
+    .logo-mark {
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      background: rgba(74, 240, 200, 0.1);
+      border: 1px solid rgba(74, 240, 200, 0.3);
+      display: grid;
+      place-items: center;
+      margin: 0 auto;
+    }
+
+    .bar {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      border: 1px solid var(--stroke);
+    }
+
+    .bar-fill {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #82ffd9);
+      border-radius: inherit;
+      animation: load 1.6s ease forwards;
+    }
+
+    @keyframes load { from { width: 0; } to { width: 100%; } }
+
+    @media (max-width: 720px) {
+      header { align-items: flex-start; }
+      .supporters { flex-direction: column; align-items: flex-start; }
       isolation: isolate;
     }
 
@@ -367,6 +640,131 @@
   </style>
 </head>
 <body>
+  <div class="loader" id="loader" aria-live="polite">
+    <div class="loader-card">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="52" height="52" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 58h52" stroke="#0d1a16" stroke-width="10" stroke-linecap="round" />
+          <path d="M36 42h28c6 0 10 5 10 10s-4 10-10 10H28" stroke="#1c2d27" stroke-width="10" stroke-linecap="round" />
+          <path d="M18 42h34c6 0 10-5 10-10s-4-10-10-10H36" stroke="#0d1a16" stroke-width="10" stroke-linecap="round" />
+          <path d="M18 42h0c-6 0-10 5-10 10s4 10 10 10h0" stroke="#1c2d27" stroke-width="10" stroke-linecap="round" />
+          <circle cx="76" cy="26" r="11" fill="#4af0c8" />
+          <circle cx="13" cy="52" r="11" fill="#4af0c8" />
+        </svg>
+      </div>
+      <div style="display:grid; gap:6px;">
+        <strong>Pushup Tracker</strong>
+        <span style="color: var(--muted);">Loading the workout bay…</span>
+      </div>
+      <div class="bar" aria-hidden="true"><span class="bar-fill"></span></div>
+      <div class="notice" style="justify-content:center;">Almost ready</div>
+    </div>
+  </div>
+
+  <div class="background">
+    <canvas id="particle-canvas"></canvas>
+    <div class="grid-overlay" id="grid-overlay"></div>
+  </div>
+
+  <main class="shell">
+    <header>
+      <div class="title-block">
+        <h1>Pushup Tracker</h1>
+        <p>Keeping pace with the community goal—one rep for every supporter. Subtle mint gradients keep things calm while we count the grind.</p>
+      </div>
+      <div class="pill">Updated manually daily</div>
+    </header>
+
+    <section class="card">
+      <div class="supporters">
+        <span class="chip" id="percent-text">0% complete</span>
+        <div class="notice">Last sync: <span id="last-updated">just now</span></div>
+        <button class="btn" id="refresh">Refresh numbers</button>
+      </div>
+      <div class="grid two" style="margin-top:14px; align-items:center;">
+        <div class="progress-ring">
+          <svg viewBox="0 0 160 160">
+            <g class="progress-bg">
+              <circle cx="80" cy="80" r="70" stroke-width="10" fill="none" />
+            </g>
+            <g class="progress-fg">
+              <circle id="progress-ring" cx="80" cy="80" r="70" stroke-width="10" fill="none" stroke="url(#grad)" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="440" />
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4af0c8" />
+                  <stop offset="100%" stop-color="#82ffd9" />
+                </linearGradient>
+              </defs>
+            </g>
+          </svg>
+          <div class="progress-number">
+            <div class="label">Total goal</div>
+            <div class="total" id="total-number">0</div>
+            <div class="percent" id="percent-inline">0%</div>
+          </div>
+        </div>
+        <div class="grid three">
+          <div class="stat">
+            <div class="stat-title">Completed</div>
+            <div class="stat-value" id="completed-count">0</div>
+            <div class="stat-sub">Reps already down.</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Remaining</div>
+            <div class="stat-value" id="remaining-count">0</div>
+            <div class="stat-sub">Reps to go.</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Daily note</div>
+            <div class="stat-sub">Manual update every day.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="stat-title" style="margin-bottom:10px;">Supporters by platform</div>
+      <div class="grid two">
+        <div class="support-card">
+          <div>
+            <p class="support-name">YouTube</p>
+            <div class="support-label">Subscribers</div>
+          </div>
+          <div class="support-count" id="youtube-count">0</div>
+        </div>
+        <div class="support-card">
+          <div>
+            <p class="support-name">Instagram</p>
+            <div class="support-label">Followers</div>
+          </div>
+          <div class="support-count" id="instagram-count">0</div>
+        </div>
+        <div class="support-card">
+          <div>
+            <p class="support-name">TikTok</p>
+            <div class="support-label">Followers</div>
+          </div>
+          <div class="support-count" id="tiktok-count">0</div>
+        </div>
+        <div class="support-card">
+          <div>
+            <p class="support-name">Twitter</p>
+            <div class="support-label">Followers</div>
+          </div>
+          <div class="support-count" id="twitter-count">0</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>Follow along:</span>
+      <a href="https://instagram.com/owenwlsh" target="_blank" rel="noreferrer">Instagram</a>
+      <a href="https://tiktok.com/@owenwlsh" target="_blank" rel="noreferrer">TikTok</a>
+      <a href="https://youtube.com/@owenwlsh" target="_blank" rel="noreferrer">YouTube</a>
+      <a href="https://twitter.com/owenwlsh" target="_blank" rel="noreferrer">Twitter</a>
+    </footer>
+  </main>
+
   <div class="intro" id="intro">
     <div class="intro-card">
       <div class="badge">Daily Mission</div>
@@ -502,6 +900,7 @@
     }
 
     async function fetchStats() {
+      const response = await fetch('./stats.json', { cache: 'no-cache' });
       const source = './stats.json';
       const response = await fetch(source, { cache: 'no-cache' });
       if (!response.ok) throw new Error('Failed to fetch stats');
@@ -525,6 +924,8 @@
       animateValue(document.getElementById('remaining-count'), state.remaining, remaining);
       animateValue(document.getElementById('total-number'), state.total, total);
 
+      document.getElementById('percent-text').textContent = `${percent}% complete`;
+      document.getElementById('percent-inline').textContent = `${percent}%`;
       document.getElementById('percent-text').textContent = `${percent}%`;
       document.getElementById('youtube-count').textContent = formatNumber(youtube);
       document.getElementById('instagram-count').textContent = formatNumber(instagram);
@@ -542,19 +943,83 @@
       state.total = total;
       state.percent = percent;
 
+      document.getElementById('last-updated').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       document.getElementById('last-updated').textContent = `Last updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
 
     async function loadData() {
+      const loader = document.getElementById('loader');
       try {
         const stats = await fetchStats();
         updateUI(stats);
       } catch (error) {
         console.error(error);
-        document.getElementById('last-updated').textContent = 'Unable to refresh stats right now.';
+        document.getElementById('last-updated').textContent = 'Unable to fetch stats right now';
+      } finally {
+        setTimeout(() => loader.classList.add('hidden'), 500);
       }
     }
 
+    function setupRefresh() {
+      document.getElementById('refresh').addEventListener('click', () => {
+        document.querySelector('.bar-fill').style.animation = 'none';
+        void document.querySelector('.bar-fill').offsetWidth;
+        document.querySelector('.bar-fill').style.animation = 'load 1.2s ease forwards';
+        document.getElementById('loader').classList.remove('hidden');
+        loadData();
+      });
+    }
+
+    function setupBackground() {
+      const canvas = document.getElementById('particle-canvas');
+      const ctx = canvas.getContext('2d');
+      const particles = Array.from({ length: 48 }, () => ({
+        x: Math.random(),
+        y: Math.random(),
+        r: Math.random() * 1.6 + 0.6,
+        speedX: (Math.random() - 0.5) * 0.08,
+        speedY: (Math.random() - 0.5) * 0.08,
+      }));
+
+      const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      let pointer = { x: 0, y: 0 };
+      window.addEventListener('pointermove', (e) => {
+        pointer.x = (e.clientX / window.innerWidth - 0.5) * 2;
+        pointer.y = (e.clientY / window.innerHeight - 0.5) * 2;
+        const grid = document.getElementById('grid-overlay');
+        grid.style.transform = `translate(${pointer.x * 8}px, ${pointer.y * 8}px)`;
+      });
+
+      function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.x += p.speedX + pointer.x * 0.0006;
+          p.y += p.speedY + pointer.y * 0.0006;
+          if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
+          if (p.y < 0) p.y = 1; if (p.y > 1) p.y = 0;
+          const x = p.x * canvas.width + pointer.x * 10;
+          const y = p.y * canvas.height + pointer.y * 10;
+          ctx.beginPath();
+          ctx.arc(x, y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(74, 240, 200, 0.55)';
+          ctx.fill();
+        });
+        requestAnimationFrame(tick);
+        document.getElementById('last-updated').textContent = 'Unable to refresh stats right now.';
+      }
+      tick();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupBackground();
+      setupRefresh();
+      loadData();
     function handleWireframe() {
       const frame = document.getElementById('wireframe');
       const card = document.getElementById('figure-card');
